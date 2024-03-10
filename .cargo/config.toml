@@ -1,0 +1,10 @@
+[target.xtensa-esp32s3-none-elf]
+# runner = "probe-rs run --chip esp32s3"
+runner = "espflash flash --monitor"
+rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "linker=rust-lld"]
+
+[build]
+target = "xtensa-esp32s3-none-elf"
+
+[unstable]
+build-std = ["alloc", "core"]

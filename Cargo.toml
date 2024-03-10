@@ -1,0 +1,40 @@
+[package]
+name = "hortalogica"
+description = "Automated indoor plant care"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+defmt = { version = "0.3.5", optional = true }
+embassy-executor = { version = "0.5.0", features = ["nightly"] }
+embassy-time = { version = "0.3.0", features = ["generic-queue-8"] }
+esp-backtrace = { version = "0.11.0", features = [
+    "exception-handler",
+    "panic-handler",
+    "println",
+] }
+esp-hal = { version = "0.16.0", features = [
+    "embassy",
+    "embassy-time-timg0",
+    "embassy-executor-thread",
+] }
+esp-println = "0.9.0"
+
+[features]
+default = ["defmt", "esp32s3"]
+esp32s3 = [
+    # All dependencies with an esp32s3 feature.
+    "esp-hal/esp32s3",
+    "esp-backtrace/esp32s3",
+    "esp-println/esp32s3",
+]
+defmt = [
+    # All dependencies with a defmt feature.
+    "dep:defmt",
+    "embassy-executor/defmt",
+    "embassy-time/defmt",
+    "esp-backtrace/defmt",
+    # esp-hal requires defmt@0.3.6, but esp-backtrace and esp-println require defmt@0.3.5
+    # "esp-hal/defmt",
+    "esp-println/defmt-espflash",
+]

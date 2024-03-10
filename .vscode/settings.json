@@ -1,0 +1,15 @@
+{
+	// "rust-analyzer.cargo.features": ["defmt", "esp32s3"],
+	"rust-analyzer.cargo.target": "xtensa-esp32s3-none-elf",
+	"rust-analyzer.check.allTargets": false,
+	"cSpell.words": [
+		"Hortalogica",
+		"Tdefmt",
+		"Xtensa",
+		"defmt",
+		"espup",
+		"rustc",
+		"rustup",
+		"timg"
+	]
+}
