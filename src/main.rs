@@ -6,24 +6,18 @@ use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
 use esp_backtrace as _;
 use esp_hal::{
+    adc::{AdcConfig, Attenuation, ADC},
     clock::ClockControl,
     embassy::{self},
-    peripherals::Peripherals,
+    gpio::IO,
+    peripherals::{Peripherals, ADC1},
     prelude::*,
     timer::TimerGroup,
 };
 use esp_println::println;
 
-#[embassy_executor::task]
-async fn run() {
-    loop {
-        Timer::after(Duration::from_millis(3_000)).await;
-        println!("Fizz");
-    }
-}
-
 #[main]
-async fn main(spawner: Spawner) {
+async fn main(_spawner: Spawner) {
     println!("Init");
     let peripherals = Peripherals::take();
     let system = peripherals.SYSTEM.split();
@@ -32,10 +26,24 @@ async fn main(spawner: Spawner) {
     let timg0 = TimerGroup::new(peripherals.TIMG0, &clocks);
     embassy::init(&clocks, timg0);
 
-    spawner.spawn(run()).ok();
+    let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
 
+    // Set up the moisture sensor power pin
+    let mut power_pin = io.pins.gpio4.into_push_pull_output();
+
+    // Create ADC instances for the moisture sensor
+    let mut adc1_config = AdcConfig::new();
+    let mut moisture_pin =
+        adc1_config.enable_pin(io.pins.gpio5.into_analog(), Attenuation::Attenuation11dB);
+    let mut adc1 = ADC::<ADC1>::new(peripherals.ADC1, adc1_config);
+
+    // Main loop.
     loop {
+        power_pin.set_high().unwrap();
+        Timer::after(Duration::from_millis(10_000)).await;
+        let pin_value: u16 = nb::block!(adc1.read(&mut moisture_pin)).unwrap();
+        println!("Moisture = {}", pin_value);
+        power_pin.set_low().unwrap();
         Timer::after(Duration::from_millis(5_000)).await;
-        println!("Buzz");
     }
 }
