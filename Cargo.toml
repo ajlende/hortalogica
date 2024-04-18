@@ -19,6 +19,7 @@ esp-hal = { version = "0.16.0", features = [
     "embassy-executor-thread",
 ] }
 esp-println = "0.9.0"
+esp-wifi = { version = "0.4.0", default-features = false, features = ["wifi"] }
 
 [features]
 default = ["defmt", "esp32s3"]
@@ -27,6 +28,7 @@ esp32s3 = [
     "esp-hal/esp32s3",
     "esp-backtrace/esp32s3",
     "esp-println/esp32s3",
+    "esp-wifi/esp32s3",
 ]
 defmt = [
     # All dependencies with a defmt feature.
@@ -37,4 +39,5 @@ defmt = [
     # esp-hal requires defmt@0.3.6, but esp-backtrace and esp-println require defmt@0.3.5
     # "esp-hal/defmt",
     "esp-println/defmt-espflash",
+    # "esp-wifi/defmt", # for some reason this causes error E0277. It may require defmt@0.3.6 too.
 ]
