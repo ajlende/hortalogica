@@ -8,6 +8,11 @@ edition = "2021"
 defmt = { version = "0.3.6", optional = true }
 embassy-executor = { version = "0.5.0", features = ["nightly"] }
 embassy-time = { version = "0.3.0", features = ["generic-queue-8"] }
+embassy-net = { version = "0.4.0", features = ["tcp", "dhcpv4"] }
+embassy-net-driver = { version = "0.2.0" }
+embassy-sync = { version = "0.5.0" }
+embassy-futures = { version = "0.1.1" }
+embedded-io-async = { version = "0.6.1" }
 esp-backtrace = { version = "0.11.1", features = [
     "exception-handler",
     "panic-handler",
@@ -17,9 +22,12 @@ esp-hal = { version = "0.17.0", features = [
     "embassy",
     "embassy-time-timg0",
     "embassy-executor-thread",
+    "async",
 ] }
 esp-println = "0.9.1"
 esp-wifi = { version = "0.5.1", default-features = false, features = ["wifi"] }
+static_cell = { version = "2.1.0", features = ["nightly"] }
+no-std-net = "0.6.0"
 
 [features]
 default = ["defmt", "esp32s3"]
@@ -40,4 +48,5 @@ defmt = [
     # "esp-hal/defmt",
     "esp-println/defmt-espflash",
     # "esp-wifi/defmt", # for some reason this causes error E0277. It may require defmt@0.3.6 too.
+    "embassy-net/defmt",
 ]
