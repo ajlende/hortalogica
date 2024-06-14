@@ -8,36 +8,37 @@ use embassy_net::{Config, Stack, StackResources};
 use embassy_time::{Duration, Timer};
 use esp_backtrace as _;
 use esp_hal::rng::Rng;
+use esp_hal::system::SystemControl;
 use esp_hal::{
-    analog::adc::{AdcConfig, Attenuation, ADC},
+    analog::adc::{AdcConfig, Attenuation, Adc},
     clock::ClockControl,
-    embassy,
-    gpio::IO,
+    gpio::Io,
     peripherals::{Peripherals, ADC1},
     prelude::*,
-    timer::TimerGroup,
+    timer::timg::TimerGroup,
 };
+use esp_hal_embassy::*;
 use esp_println::println;
 use esp_wifi::wifi::{ClientConfiguration, Configuration, WifiStaDevice};
 use esp_wifi::wifi::{WifiController, WifiDevice, WifiEvent, WifiState};
 use esp_wifi::{initialize, EspWifiInitFor};
 use static_cell::make_static;
 
-const SSID: &str = env("SSID");
-const PASSWORD: &str = env!("PASSWORD");
-const HOST_IP: &str = env!("HOST_IP");
+const SSID: &str = option_env!("SSID").unwrap();
+const PASSWORD: &str = option_env!("PASSWORD").unwrap();
+const HOST_IP: &str = option_env!("HOST_IP").unwrap();
 
 #[main]
 async fn main(spawner: Spawner) {
     println!("Init");
 
     let peripherals = Peripherals::take();
-    let system = peripherals.SYSTEM.split();
+    let system = SystemControl::new(peripherals.SYSTEM);
     let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
 
     // let timerInterrupt: Option<TimerInterrupts> = TimerInterrupts.``
     let timg0 = TimerGroup::new_async(peripherals.TIMG0, &clocks);
-    embassy::init(&clocks, timg0);
+    esp_hal_embassy::init(&clocks, timg0);
 
     let timer = TimerGroup::new(peripherals.TIMG1, &clocks, None).timer0;
 
@@ -45,7 +46,7 @@ async fn main(spawner: Spawner) {
         EspWifiInitFor::Wifi,
         timer,
         Rng::new(peripherals.RNG),
-        system.radio_clock_control,
+        peripherals.RADIO_CLK,
         &clocks,
     )
     .unwrap();
@@ -61,28 +62,31 @@ async fn main(spawner: Spawner) {
     let (wifi_interface, controller) =
         esp_wifi::wifi::new_with_mode(&init, wifi, WifiStaDevice).unwrap();
 
-    let stack = &*make_static!(Stack::new(
-        wifi_interface,
-        config,
-        make_static!(StackResources::<3>::new()),
-        seed
-    ));
+    let stack = &*mk_static!(
+        Stack<WifiDevice<'_, WifiStaDevice>>,
+        Stack::new(
+            wifi_interface,
+            config,
+            mk_static!(StackResources<3>, StackResources::<3>::new()),
+            seed
+        )
+    );
 
     spawner.spawn(connection(controller)).ok();
     spawner.spawn(net_task(&stack)).ok();
 
     let socket = TcpSocket::new(&stack, &mut rx_buffer, &mut tx_buffer);
 
-    let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
+    let io = Io::new(peripherals.GPIO, peripherals.IO_MUX);
 
     // Set up the moisture sensor power pin
-    let mut power_pin = io.pins.gpio4.into_push_pull_output();
+    let mut power_pin = io.pins.gpio4;
 
     // Create ADC instances for the moisture sensor
     let mut adc1_config = AdcConfig::new();
     let mut moisture_pin =
-        adc1_config.enable_pin(io.pins.gpio5.into_analog(), Attenuation::Attenuation11dB);
-    let mut adc1 = ADC::<ADC1>::new(peripherals.ADC1, adc1_config);
+        adc1_config.enable_pin(io.pins.gpio5, Attenuation::Attenuation11dB);
+    let mut adc1 = Adc::<ADC1>::new(peripherals.ADC1, adc1_config);
 
     // Main loop.
     loop {
