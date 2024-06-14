@@ -5,9 +5,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-defmt = { version = "0.3.6", optional = true }
+defmt = { version = "0.3.8", optional = true }
 embassy-executor = { version = "0.5.0", features = ["nightly"] }
-embassy-time = { version = "0.3.0", features = ["generic-queue-8"] }
+embassy-time = { version = "0.3.1", features = ["generic-queue-8"] }
 embassy-net = { version = "0.4.0", features = ["tcp", "dhcpv4"] }
 embassy-net-driver = { version = "0.2.0" }
 embassy-sync = { version = "0.6.0" }
@@ -40,9 +40,8 @@ defmt = [
     "embassy-executor/defmt",
     "embassy-time/defmt",
     "esp-backtrace/defmt",
-    # esp-hal requires defmt@0.3.6, but esp-backtrace and esp-println require defmt@0.3.5
-    # "esp-hal/defmt",
+    "esp-hal/defmt",
     "esp-println/defmt-espflash",
-    # "esp-wifi/defmt", # for some reason this causes error E0277. It may require defmt@0.3.6 too.
+    # "esp-wifi/defmt",             # for some reason this causes error E0277. It may require defmt@0.3.6 too.
     "embassy-net/defmt",
 ]
