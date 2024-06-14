@@ -1,8 +1,7 @@
 [target.xtensa-esp32s3-none-elf]
 # runner = "probe-rs run --chip esp32s3"
 runner = "espflash flash --monitor"
-rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "linker=rust-lld"]
-
+rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "linker=rust-lld", "-C", "link-arg=-Trom_functions.x"]
 [build]
 target = "xtensa-esp32s3-none-elf"
 

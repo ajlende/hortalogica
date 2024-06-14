@@ -22,11 +22,19 @@ use esp_println::println;
 use esp_wifi::wifi::{ClientConfiguration, Configuration, WifiStaDevice};
 use esp_wifi::wifi::{WifiController, WifiDevice, WifiEvent, WifiState};
 use esp_wifi::{initialize, EspWifiInitFor};
-use static_cell::make_static;
 
-const SSID: &str = option_env!("SSID").unwrap();
-const PASSWORD: &str = option_env!("PASSWORD").unwrap();
-const HOST_IP: &str = option_env!("HOST_IP").unwrap();
+const SSID: &str = "SSID";
+const PASSWORD: &str = "PASSWORD";
+const HOST_IP: &str = "HOST";
+
+macro_rules! mk_static {
+    ($t:ty,$val:expr) => {{
+        static STATIC_CELL: static_cell::StaticCell<$t> = static_cell::StaticCell::new();
+        #[deny(unused_attributes)]
+        let x = STATIC_CELL.uninit().write(($val));
+        x
+    }};
+}
 
 #[main]
 async fn main(spawner: Spawner) {
