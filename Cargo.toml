@@ -42,6 +42,6 @@ defmt = [
     "esp-backtrace/defmt",
     "esp-hal/defmt",
     "esp-println/defmt-espflash",
-    # "esp-wifi/defmt",             # for some reason this causes error E0277. It may require defmt@0.3.6 too.
+    "esp-wifi/defmt",
     "embassy-net/defmt",
 ]

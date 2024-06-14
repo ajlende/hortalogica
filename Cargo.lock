@@ -692,6 +692,7 @@ dependencies = [
  "atomic-waker",
  "cfg-if",
  "critical-section",
+ "defmt",
  "embedded-io",
  "enumset",
  "esp-build",
@@ -708,6 +709,7 @@ dependencies = [
  "num-traits",
  "portable-atomic",
  "portable_atomic_enum",
+ "smoltcp",
  "toml-cfg",
 ]
 
